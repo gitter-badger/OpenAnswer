@@ -4,7 +4,7 @@ from .forms import LoginForm
 
 @app.route('/')
 def home():
-	user = {'nickname': 'Rachel'}  #  fake user
+	user = {'nickname': 'User'}  #  fake user
 	posts = [ # fake array of posts
 		{
 			'author': user,
@@ -25,10 +25,11 @@ def login():
 	if form.validate_on_submit():
 		flash(
 			'Login requested for OpenID=%s, remember_me=%s' % 
-			(form.openid.data, str(form.remember_me.data))
-		)
+			(form.openid.data, str(form.remember_me.data)))
+		return redirect('/')
 	return render_template(
 		'login.html',
 		title='Sign in',
-		form=form
+		form=form,
+		providers=app.config['OPENID_PROVIDERS']
 	)
