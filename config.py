@@ -11,4 +11,8 @@ OAUTH_CREDENTIALS = {
         'id': os.environ['FB_OAUTH_ID'],
         'secret': os.environ['FB_OAUTH_SECRET'],
     },
+    'google': {
+        'id': os.environ['GO_OAUTH_ID'],
+        'secret': os.environ['GO_OAUTH_SECRET'],
+    }
 }

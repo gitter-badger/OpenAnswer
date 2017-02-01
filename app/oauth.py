@@ -1,6 +1,6 @@
-from rauth import OAuth1Service, OAuth2Service
-from flask import current_app, url_for, request, redirect, session
-
+from rauth import OAuth2Service
+from flask import current_app, url_for, request, redirect
+import json
 
 class OAuthSignIn:
     providers = None
@@ -67,3 +67,42 @@ class FacebookSignIn(OAuthSignIn):
             me.get('email')
         )
 
+class GoogleSignIn(OAuthSignIn):
+    def __init__(self):
+        super(GoogleSignIn, self).__init__('google')
+        self.service = OAuth2Service(
+            name='google',
+            client_id=self.consumer_id,
+            client_secret=self.consumer_secret,
+            authorize_url='https://accounts.google.com/o/oauth2/auth',
+            access_token_url='https://accounts.google.com/o/oauth2/token',
+            base_url='https://accounts.google.com/'
+        )
+
+    def authorize(self):
+        return redirect(self.service.get_authorize_url(
+            scope='email', #'https://www.googleapis.com/auth/userinfo.email',
+            response_type='code',
+            redirect_uri=self.get_callback_url())
+        )
+
+    def _decode(self, content):
+        return json.loads(content.decode())
+
+    def callback(self):
+        if 'code' not in request.args:
+            return None, None, None
+        oauth_session = self.service.get_auth_session(
+            data={'code': request.args['code'],
+                  'grant_type': 'authorization_code',
+                  'redirect_uri': self.get_callback_url()},
+            decoder=self._decode
+        )
+        me = oauth_session.get('https://www.googleapis.com/oauth2/v1/userinfo').json()
+        return (
+            'google$' + me['id'],
+            me.get('email').split('@')[0],  # Google does not provide
+                                            # username either, so the email's user
+                                            # is used instead
+            me.get('email')
+        )

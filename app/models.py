@@ -19,6 +19,7 @@ def load_user(id):
     u = User.query.get(int(id))
     return u
 
+
 class Post(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     body = db.Column(db.String(5000))
