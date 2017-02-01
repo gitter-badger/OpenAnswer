@@ -14,5 +14,9 @@ OAUTH_CREDENTIALS = {
     'google': {
         'id': os.environ['GO_OAUTH_ID'],
         'secret': os.environ['GO_OAUTH_SECRET'],
+    },
+    'slack': {
+        'id': os.environ['SL_OAUTH_ID'],
+        'secret': os.environ['SL_OAUTH_SECRET']
     }
 }
