@@ -35,3 +35,4 @@ def login():
         form=form,
         providers=app.config['OPENID_PROVIDERS']
     )
+
