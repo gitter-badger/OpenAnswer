@@ -3,3 +3,4 @@ ve/*
 tmp/*
 *__pycache__
 .idea/
+app.db
