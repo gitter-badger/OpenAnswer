@@ -17,4 +17,4 @@ lm.login_view = ''
 from app import views, models
 from app.chat import events
 
-socketio.run(app)
+
