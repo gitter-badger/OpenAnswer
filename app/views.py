@@ -19,12 +19,12 @@ def logout():
 @app.route('/user/<username>')
 @login_required
 def user(username):
-    user = User.query.filter_by(username=username).first()
-    if not user:
+    _user = User.query.filter_by(username=username).first()
+    if not _user:
         flash('User %s not found' % username)
         return redirect(url_for('home'))
     posts = []
-    return render_template('user.html', user=user, posts=posts)
+    return render_template('user.html', user=_user, posts=posts)
 
 
 @app.route('/authorize/<provider>')
@@ -44,12 +44,12 @@ def oauth_callback(provider):
     if email is None:
         flash('Authentication failed.')
         return redirect(url_for('home'))
-    user = User.query.filter_by(email=email).first()
-    if not user:
+    _user = User.query.filter_by(email=email).first()
+    if not _user:
         # TODO: Prompt them to choose a username
         username = email.split('@')[0]
-        user = User(email=email, username=username)
-        db.session.add(user)
+        _user = User(email=email, username=username)
+        db.session.add(_user)
         db.session.commit()
-    login_user(user, True)
+    login_user(_user, True)
     return redirect(url_for('home'))
