@@ -55,18 +55,15 @@ class FacebookSignIn(OAuthSignIn):
 
     def callback(self):
         if 'code' not in request.args:
-            return None, None, None
+            return None
         oauth_session = self.service.get_auth_session(
             data={'code': request.args['code'],
                   'grant_type': 'authorization_code',
                   'redirect_uri': self.get_callback_url()}
         )
-        me = oauth_session.get('me?fields=id,email').json()
-        return (
-            'facebook$' + me['id'],
-            me.get('email').split('@')[0],  # Facebook does not provide username, so the email's user is used instead
-            me.get('email')
-        )
+        me = oauth_session.get('me?fields=email').json()
+        return me.get('email')
+
 
 class GoogleSignIn(OAuthSignIn):
     def __init__(self):
@@ -89,7 +86,7 @@ class GoogleSignIn(OAuthSignIn):
 
     def callback(self):
         if 'code' not in request.args:
-            return None, None, None
+            return None
         oauth_session = self.service.get_auth_session(
             data={'code': request.args['code'],
                   'grant_type': 'authorization_code',
@@ -97,11 +94,7 @@ class GoogleSignIn(OAuthSignIn):
             decoder=self.json_decode
         )
         me = oauth_session.get('https://www.googleapis.com/oauth2/v1/userinfo').json()
-        return (
-            'google$' + me['id'],
-            me.get('email').split('@')[0],  # Google does not provide username either, so the email's user is used instead
-            me.get('email')
-        )
+        return me.get('email')
 
 
 class SlackSignIn(OAuthSignIn):
@@ -119,13 +112,12 @@ class SlackSignIn(OAuthSignIn):
     def authorize(self):
         return redirect(self.service.get_authorize_url(
             scope='identity.basic,identity.email',
-            # response_type='code',
             redirect_uri=self.get_callback_url())
         )
 
     def callback(self):
         if 'code' not in request.args:
-            return None, None, None
+            return None
         oauth_session = self.service.get_auth_session(
             data={'code': request.args['code'],
                   'redirect_uri': self.get_callback_url()},
@@ -133,8 +125,4 @@ class SlackSignIn(OAuthSignIn):
         )
         resp = self.json_decode(oauth_session.access_token_response.content)
         me = self.json_decode(oauth_session.post('https://slack.com/api/users.identity', data={'token': resp['access_token']}).content)['user']
-        return (
-            'slack$' + me['id'],
-            me.get('email').split('@')[0], # Slack does not provide username either, so the email's user is used instead
-            me.get('email')
-        )
+        return me.get('email')
