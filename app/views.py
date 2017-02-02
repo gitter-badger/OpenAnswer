@@ -2,7 +2,13 @@ from flask import render_template, flash, redirect, url_for
 from app import app, db
 from .models import User
 from flask_login import login_user, logout_user, current_user, login_required
-from .oauth import OAuthSignIn
+from app.oauth import OAuthSignIn
+
+
+@app.route('/chat')
+@login_required
+def chat():
+    return render_template('chat.html', user=current_user)
 
 
 @app.route('/')
