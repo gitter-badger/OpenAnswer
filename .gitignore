@@ -4,3 +4,8 @@ tmp/*
 *__pycache__
 .idea/
 app.db
+
+# Elastic Beanstalk Files
+.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml
