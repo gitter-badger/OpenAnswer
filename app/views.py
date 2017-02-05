@@ -1,8 +1,10 @@
-from flask import render_template, flash, redirect, url_for
 from app import app, db
-from .models import User
-from flask_login import login_user, logout_user, current_user, login_required
 from app.oauth import OAuthSignIn
+from flask import render_template, flash, redirect, url_for
+from flask_login import login_user, logout_user, current_user, login_required
+from sqlalchemy.sql import exists
+from .forms import SignupForm
+from .models import User
 
 
 @app.route('/chat')
@@ -33,6 +35,22 @@ def user(username):
     return render_template('user.html', user=_user, posts=posts)
 
 
+@app.route('/signup/<email>', methods=['GET', 'POST'])
+def signup(email):
+    form = SignupForm()
+    if form.validate_on_submit():
+        username = form.username.data
+        if not db.session.query(exists().where(User.username == username)).scalar():
+            _user = User(email=email, username=username)
+            db.session.add(_user)
+            db.session.commit()
+            login_user(_user, True)
+            return redirect(url_for('home'))
+        else:
+            form.username.errors.append('That username has been registered, please pick a new one')
+    return render_template('signup.html', form=form)
+
+
 @app.route('/authorize/<provider>')
 def oauth_authorize(provider):
     if not current_user.is_anonymous:
@@ -52,10 +70,6 @@ def oauth_callback(provider):
         return redirect(url_for('home'))
     _user = User.query.filter_by(email=email).first()
     if not _user:
-        # TODO: Prompt them to choose a username
-        username = email.split('@')[0]
-        _user = User(email=email, username=username)
-        db.session.add(_user)
-        db.session.commit()
+        return redirect(url_for('signup', email=email))
     login_user(_user, True)
     return redirect(url_for('home'))
